@@ -3,10 +3,11 @@
         "user_id": "12345",
         "name": "yash", 
         "hashed_Password": "abc12345",
-        "ticketd_booked":[{
-            "source": "banglore",
-            "destination":"mumbai",
-            "date_of_travel": "2023-12-08T18:30:007",
+        "ticketd_booked":[
+            {
+            "source": "Banglore",
+            "destination":"Mumbai",
+            "date_of_travel": "2023-12-08T18:30:00Z",
             "train":{
                 "train_id":"bacs",
                 "train_no": 12345,

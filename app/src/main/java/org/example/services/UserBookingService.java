@@ -14,9 +14,9 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class UserBookingService {
-    private User user1;
+    private User user;
     private List<User> userList;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String USERS_PATH = "app/src/main/java/org/example/localdb/user.json";
 
     public UserBookingService(User user1) throws IOException {
@@ -29,15 +29,16 @@ public class UserBookingService {
     }
 
     private void loadUsers() throws IOException {
-        userList = objectMapper.readValue(new File(USERS_PATH), new TypeReference<List<User>>() {});
+        userList = objectMapper.readValue(new File(USERS_PATH), new TypeReference<List<User>>() {
+        });
     }
 
     public Boolean loginUser() {
-        Optional<User> founduser = userList.stream().filter(user1 -> {
+        Optional<User> foundUser = userList.stream().filter(user1 -> {
             return user1.getName().equals(user.getName())
                     && userserviceutil.checkPassword(user.getPassword(), user1.getHashedPassword());
         }).findFirst();
-        return founduser.isPresent();
+        return foundUser.isPresent();
     }
 
     public Boolean signUp(User user1) {
@@ -56,56 +57,27 @@ public class UserBookingService {
     }
 
     public void fetchBookings() {
-        Optional<User> userFetched = userList.stream().filter(user1 -> {
-            return user1.getName().equals(user.getName())
-                    && userserviceutil.checkPassword(user.getPassword(), user1.getHashedPassword());
-        }).findFirst();
-        if (userFetched.isPresent()) {
-            userFetched.get().printTickets();
-        }
+        user.printTickets();
     }
 
-    public Boolean cancelBooking(String ticketId) {
-
-        Scanner s = new Scanner(System.in);
-        System.out.println("Enter the ticket id to cancel");
-        ticketId = s.next();
-
-        if (ticketId == null || ticketId.isEmpty()) {
-            System.out.println("Ticket ID cannot be null or empty.");
-            return Boolean.FALSE;
-        }
-
-        String finalTicketId1 = ticketId; // Because strings are immutable
-        boolean removed = user.getTicketsBooked().removeIf(ticket -> ticket.getTicketId().equals(finalTicketId1));
-
-        String finalTicketId = ticketId;
-        user.getTicketsBooked().removeIf(Ticket -> Ticket.getTicketId().equals(finalTicketId));
-        if (removed) {
-            System.out.println("Ticket with ID " + ticketId + " has been canceled.");
-            return Boolean.TRUE;
-        } else {
-            System.out.println("No ticket found with ID " + ticketId);
-            return Boolean.FALSE;
-        }
-
+    public Boolean cancelBooking(String ticketId){
+       return Boolean.FALSE;
     }
 
-    public List<Train> gettrains(String source, String destination) {
+public List<Train> gettrains(String source, String destination){
         try {
             TrainService trainService = new TrainService();
-            return trainService.searchTrains(source, destination);
-        } catch (IOException ex) {
-            return new ArrayList<>();
-        }
-    }
 
-    public List<List<Integer>> fetchSeats(Train train) {
+            return trainService.searchTrains(source, destination);
+        }catch(IOException ex ){ return new ArrayList<>();}
+}
+
+    public List<List<Integer>> fetchSeats(Train train){
         return train.getSeats();
     }
 
     public Boolean bookTrainSeat(Train train, int row, int seat) {
-        try {
+        try{
             TrainService trainService = new TrainService();
             List<List<Integer>> seats = train.getSeats();
             if (row >= 0 && row < seats.size() && seat >= 0 && seat < seats.get(row).size()) {
@@ -120,9 +92,8 @@ public class UserBookingService {
             } else {
                 return false; // Invalid row or seat index
             }
-        } catch (IOException ex) {
+        }catch (IOException ex){
             return Boolean.FALSE;
         }
     }
-
 }

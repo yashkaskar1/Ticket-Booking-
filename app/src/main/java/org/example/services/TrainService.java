@@ -1,38 +1,31 @@
 package org.example.services;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.example.entities.Train;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
 
-
-import org.example.entities.Train;
-
-public class TrainService {
+public class TrainService{
     private List<Train> trainList;
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static final String TRAIN_PATH = "app/src/main/java/org/example/localdb/trains.json";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String TRAIN_DB_PATH = "../localdb/trains.json";
 
     public TrainService() throws IOException {
-        File trains = new File(TRAIN_PATH);
-        trainList = objectMapper.readValue(trains, new TypeReference<List<Train>>() {
-        });
+        File trains = new File(TRAIN_DB_PATH);
+        trainList = objectMapper.readValue(trains, new TypeReference<List<Train>>() {});
     }
 
     public List<Train> searchTrains(String source, String destination) {
         return trainList.stream().filter(train -> validTrain(train, source, destination)).collect(Collectors.toList());
-    }
 
+    }
     private boolean validTrain(Train train, String source, String destination) {
         List<String> stationOrder = train.getStations();
 
@@ -42,14 +35,6 @@ public class TrainService {
         return sourceIndex != -1 && destinationIndex != -1 && sourceIndex < destinationIndex;
     }
 
-    private void saveTrainListToFile() {
-        try {
-            objectMapper.writeValue(new File(TRAIN_PATH), trainList);
-        } catch (IOException e) {
-            e.printStackTrace(); // Handle the exception based on your application's requirements
-        }
-    }
-
     public void addTrain(Train newTrain) {
         // Check if a train with the same trainId already exists
         Optional<Train> existingTrain = trainList.stream()
@@ -57,13 +42,20 @@ public class TrainService {
                 .findFirst();
 
         if (existingTrain.isPresent()) {
-            // If a train with the same trainId exists, update it instead of adding a new
-            // one
+            // If a train with the same trainId exists, update it instead of adding a new one
             updateTrain(newTrain);
         } else {
             // Otherwise, add the new train to the list
             trainList.add(newTrain);
             saveTrainListToFile();
+        }
+    }
+
+    private void saveTrainListToFile() {
+        try {
+            objectMapper.writeValue(new File(TRAIN_DB_PATH), trainList);
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the exception based on your application's requirements
         }
     }
 
@@ -83,10 +75,5 @@ public class TrainService {
         }
     }
 
-    public List<Train> getAllTrains() throws IOException {
-    String trains = new String(Files.readAllBytes(Paths.get("trains.json")));
-    trainList = objectMapper.readValue(trains, new TypeReference<List<Train>>() { });
-    return trainList;
-}
 
 }
